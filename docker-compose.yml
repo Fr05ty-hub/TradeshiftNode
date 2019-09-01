@@ -2,13 +2,13 @@ version: '3'
 services:
   web:
     build: .
+
     ports:
       - "5000:5000"
     depends_on:
       - "redis"
   redis:
     image: "redis:alpine"
-    command: ["redis-server", "--appendonly", "yes"]
-    hostname: redis
-    volumes: 
-      - ".:/data"
+    command: ["redis-server", "/data/redis.conf", "--appendonly", "yes" ]
+    volumes:
+      - C:\Users\lzocco\Fr05ty-hub\tradeshift:/data

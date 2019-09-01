@@ -21,7 +21,7 @@ def verify_password(username, password):
     return False
 
 
-@auth.errorhandler
+@auth.error_handler
 def unauthorized():
     return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
@@ -48,14 +48,14 @@ def data_error(error):
 
 @app.route('/app/api/v1.0/nodes/children/<node_id>', methods=['GET'])
 def get_node_children(node_id):
-    r = redis.StrictRedis()
+    r = redis.StrictRedis(host='redis', port=6379)
     children = node_offspring(r, node_id, 1)
-    return jsonify(children[1])
+    return jsonify(children)
 
 
 @app.route('/app/api/v1.0/nodes/offspring/<node_id>/<levels>', methods=['GET'])
 def get_node_offspring(node_id, levels):
-    r = redis.StrictRedis()
+    r = redis.StrictRedis(host='redis', port=6379)
     if r.exists(node_id+":children") == 0:
         raise not_found
     children = node_offspring(r, node_id, levels)
@@ -79,7 +79,7 @@ def node_offspring(redis, node, levels=-1):
     node_dict = {}
     node_dict['0'] = [node]
     child_string = ":children"
-    children = redis.lrange(node + child_string, 0, -1)
+    children = redis.lrange(node+child_string, 0, -1)
     node_dict['1'] = children
     level = 2
     while level <= levels or levels == -1:
