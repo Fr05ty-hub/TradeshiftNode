@@ -9,6 +9,6 @@ services:
       - "redis"
   redis:
     image: "redis:alpine"
-    command: ["redis-server", "/data/redis.conf", "--appendonly", "yes" ]
+    command: ["redis-server", "--appendonly", "yes" ]
     volumes:
       - C:\Users\lzocco\Fr05ty-hub\tradeshift:/data

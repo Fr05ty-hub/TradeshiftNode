@@ -1,5 +1,5 @@
 FROM redis
-COPY ./redis.conf ./data/redis.conf
+COPY ./appendonly.aof ./data/appendonly.aof
 FROM python:3.7-alpine
 WORKDIR /data
 ENV FLASK_APP app.py
