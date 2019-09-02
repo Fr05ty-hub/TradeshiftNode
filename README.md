@@ -110,3 +110,13 @@ HTTP requests to add or modify properties require Basic Authorisation:
 user = 'test'
 
 password = 'test'
+
+-------
+
+## Persistence
+
+The Redis database is writing down all commands sent to the database in an AOF file within the volume which means that even if the container hosting Redis is killed, the data will remain. If you close the container hosting the Redis DB, when you relaunch it, Redis will automatically read the AOF file and rebuild the DB based on it.
+
+You can read more about this below:
+
+[https://redis.io/topics/persistence](https://redis.io/topics/persistence)
