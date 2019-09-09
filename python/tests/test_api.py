@@ -143,6 +143,7 @@ def test_simple_add():
 
     assert results == 200
 
+
 # Test add a node with missing values
 def test_neg_add():
     node_data = {
@@ -153,6 +154,7 @@ def test_neg_add():
     results = add_node(node_data)
 
     assert results == 400
+
 
 # Test add a node with missing parent
 def test_mis_par_add():
@@ -166,6 +168,7 @@ def test_mis_par_add():
 
     assert results == 400
 
+
 # Test add a node with name Nil (REDIS DOESN'T LIKE IT)
 def test_nil_add():
     node_data = {
@@ -176,6 +179,7 @@ def test_nil_add():
     results = add_node(node_data)
 
     assert results == 400
+
 
 # Test add a node id with spaces
 def test_spac_add():
@@ -189,6 +193,7 @@ def test_spac_add():
 
     assert results == 200
 
+
 # Test add a node with parent id with spaces
 def test_spac_par_add():
     node_data = {
@@ -201,6 +206,7 @@ def test_spac_par_add():
 
     assert results == 200
 
+
 # Test add an existing node again
 def test_mult_add():
     node_data = {
@@ -212,6 +218,7 @@ def test_mult_add():
     results = add_node(node_data)
 
     assert results == 400
+
 
 # Test add a node with non-existing parent
 def test_neg_root_add():
@@ -226,6 +233,7 @@ def test_neg_root_add():
     assert results == 400
 
 
+# Test simple check get children
 def test_simple_get():
     results = get_children('root')
     got_results = json.loads(results.content)
@@ -234,6 +242,7 @@ def test_simple_get():
     assert got_results == exp_results
 
 
+# Test check if get children works with spaces
 def test_spac_get():
     results = get_children('O G')
     got_results = json.loads(results.content)
@@ -242,18 +251,21 @@ def test_spac_get():
     assert got_results == exp_results
 
 
+# Test check invalid name
 def test_null_get():
     results = get_children('Nil')
 
     assert results.status_code == 440
 
 
+# Test to check empty get commands
 def test_empty_get():
     results = get_children('')
 
     assert results.status_code == 404
 
 
+# Test to check nodes with no children
 def test_no_child_get():
     results = get_children('Liquid')
     got_results = json.loads(results.content)
@@ -281,7 +293,7 @@ def test_simple_check_data():
 
     assert data == db_data
 
-
+#Test to check if offspring is limited to levels
 def test_offspring_levels():
     results = get_offspring('root', '2')
     got_results = json.loads(results.content)
@@ -290,7 +302,7 @@ def test_offspring_levels():
 
     assert got_results == exp_results
 
-
+# Test to check if unlimited offspring gets brought back
 def test_offspring_unlimited():
     results = get_offspring('root', '0')
     got_results = json.loads(results.content)
@@ -300,7 +312,7 @@ def test_offspring_unlimited():
 
     assert got_results == exp_results
 
-
+# Test to check what happens if no level argument is passed
 def test_offspring_no_level():
     results = get_offspring('root')
 

@@ -117,6 +117,8 @@ password = 'test'
 
 I have not done the full suite of Unit Test I would have liked. I have taken some tests to fix previous errors in implementation, though I'm sure more issues are around, I just haven't gotten round to fixing them. Testing has been done using PyTest (sort of as I haven't migrated to the nicer architecture of it) in PyCharm and is run against a local copy of the Redis database and API.
 
+If you want to run this, please comment out line 13 in app.py and uncomment line 12 so it points to the local Redis database. If you try to deploy the API with Redis pointing to localhost instead of Redis, it will not match up with the Docker Redis container and the API will be useless.
+
 -------
 
 ## Persistence

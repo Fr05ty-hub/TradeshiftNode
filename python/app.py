@@ -9,8 +9,8 @@ import redis
 app = Flask(__name__)
 
 auth = HTTPBasicAuth()
-#r_cli = redis.StrictRedis(host='redis', port=6379, decode_responses=True)
-r_cli = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
+r_cli = redis.StrictRedis(host='redis', port=6379, decode_responses=True)
+#r_cli = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
 # This user dictionary is just a placeholder to enable demos. In a practical application, it would actually query a
 # database to validate security credentials
 users = {
