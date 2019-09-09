@@ -113,6 +113,12 @@ password = 'test'
 
 -------
 
+## Unit Testing
+
+I have not done the full suite of Unit Test I would have liked. I have taken some tests to fix previous errors in implementation, though I'm sure more issues are around, I just haven't gotten round to fixing them. Testing has been done using PyTest (sort of as I haven't migrated to the nicer architecture of it) in PyCharm and is run against a local copy of the Redis database and API.
+
+-------
+
 ## Persistence
 
 The Redis database is writing down all commands sent to the database in an AOF file within the volume which means that even if the container hosting Redis is killed, the data will remain. If you close the container hosting the Redis DB, when you relaunch it, Redis will automatically read the AOF file and rebuild the DB based on it.
