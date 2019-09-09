@@ -2,3 +2,5 @@ flask
 flask_httpauth
 werkzeug
 redis
+pytest
+requests

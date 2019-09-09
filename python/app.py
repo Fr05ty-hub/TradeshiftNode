@@ -9,7 +9,8 @@ import redis
 app = Flask(__name__)
 
 auth = HTTPBasicAuth()
-r_cli = redis.StrictRedis(host='redis', port=6379, decode_responses=True)
+#r_cli = redis.StrictRedis(host='redis', port=6379, decode_responses=True)
+r_cli = redis.StrictRedis(host='localhost', port=6379, decode_responses=True)
 # This user dictionary is just a placeholder to enable demos. In a practical application, it would actually query a
 # database to validate security credentials
 users = {
@@ -56,33 +57,56 @@ def get_node_offspring(node_id, levels):
     return json.dumps(children)
 
 # Function to add a new node to the database
-@app.route('/app/api/v1.0/nodes/add', methods=['POST'])
+@app.route('/app/api/v1.0/nodes/add', methods=['PUT'])
 @auth.login_required
 def add_node():
-    if not request.json or 'id' not in request.json or 'parent' not in request.json or 'root' not in request.json:
-        raise BadRequest("Missing node parameters to add for db", 400, {'ext': 1})
-    parent_data = r_cli.hgetall(request.json['parent'])
+    if not request.json:
+        raise BadRequest("Missing JSON", 400, {'ext': 1})
+
+    received = json.loads(request.json)
+
+    if 'id' not in received or 'parent' not in received or 'root' not in received:
+        raise BadRequest("Missing data to add to db in JSON", 400, {'ext': 1})
+
+    if received['id'] == 'Nil':
+        raise BadRequest("Nil is unacceptable as id", 400, {'ext': 1})
+
+    if not r_cli.hgetall(received['root']):
+        raise BadRequest("Specified root does not exist", 400, {'ext': 1})
+
+    if r_cli.hgetall(received['id']):
+        raise BadRequest("Object with ID already exists", 400, {'ext': 1})
+
+    parent_data = r_cli.hgetall(received['parent'])
     if not parent_data:
         raise BadRequest("Parent node does not exist", 400, {'ext': 1})
-    param_str = ''
-    request.json['height'] = str(int(parent_data['height'])+1)
-    for item in request.json:
-        param_str = param_str + request.json[item]
+    received['height'] = str(int(parent_data['height'])+1)
     pipe = r_cli.pipeline()
-    pipe.hmset(request.json['id'], request.json)
-    pipe.lpush(request.json['parent']+":children", request.json['id'])
+    pipe.hmset(received['id'], received)
+    pipe.lpush(received['parent']+":children", received['id'])
     val = pipe.execute()
 
     return json.dumps(val)
 
 # Function to change the parent of a node
-@app.route('/app/api/v1.0/nodes/parent_change', methods=['PUT'])
+@app.route('/app/api/v1.0/nodes/parent_change', methods=['POST'])
 @auth.login_required
 def change_node_parent():
-    if not request.json or 'node' not in request.json or 'new_parent' not in request.json:
+    if not request.json:
+        raise BadRequest("Missing JSON", 400, {'ext': 1})
+
+    received = json.loads(request.json)
+
+    if 'node' not in received or 'new_parent' not in received:
         raise BadRequest("Missing node parameters or nodes not present in db", 400, {'ext': 1})
-    node_id = request.json['node']
-    new_parent = request.json['new_parent']
+
+    node_id = received['node']
+    new_parent = received['new_parent']
+
+    nod_off = node_offspring_flat(node_id)
+    if new_parent in nod_off:
+        raise BadRequest("New parent is offspring of node. Cannot change. Circlejerk avoided", 400, {'ext': 1})
+
     val = redis_change_parent(node_id, new_parent)
 
     return json.dumps(val)
@@ -118,6 +142,34 @@ def node_offspring(node, levels=0):
             node_dict[level] = new_spawn
 
     return node_dict
+
+
+# Function finds offspring of a node to X degrees of depth but in a flat list
+def node_offspring_flat(node, levels=0):
+    node_dict = {}
+    node_list = []
+    if not node_check(node):
+        return -1
+    child_string = ":children"
+    level = 1
+    children = r_cli.lrange(node+child_string, 0, -1)
+    node_dict[level] = children
+
+    while int(level) < int(levels) or int(levels) == 0:
+        if level not in node_dict.keys():
+            break
+        level = level + 1
+        new_spawn = []
+        for x in node_dict[level-1]:
+            children = r_cli.lrange(x+child_string, 0, -1)
+            new_spawn = new_spawn + children
+        if len(new_spawn) != 0:
+            node_dict[level] = new_spawn
+
+    for key in node_dict:
+        node_list.extend(node_dict[key])
+
+    return node_list
 
 
 # Queues all the commands for Redis to execute atomically in a queue
